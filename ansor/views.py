@@ -2,11 +2,11 @@ from django.shortcuts import render
 from rest_framework import status
 from rest_framework.response import Response
 
-from .serializers import CourseSerializer, ApplicantSerializer, RegisterSerializer
-from .models import Course, Applicant, CustomUser
+from .serializers import CourseSerializer, ApplicantSerializer, RegisterSerializer, GroupSerializer, StudentSerializer
+from .models import Course, Applicant, CustomUser, Group, Student
 from rest_framework.permissions import IsAdminUser, AllowAny
 from rest_framework.viewsets import ModelViewSet
-from rest_framework.generics import CreateAPIView
+from rest_framework.generics import CreateAPIView, ListCreateAPIView, RetrieveUpdateAPIView
 import requests
 
 
@@ -19,6 +19,12 @@ class RegisterView(CreateAPIView):
 class CourseViewSet(ModelViewSet):
     queryset = Course.objects.all()
     serializer_class = CourseSerializer
+    permission_classes = (IsAdminUser,)
+
+
+class GroupView(ListCreateAPIView):
+    queryset = Group.objects.all()
+    serializer_class = GroupSerializer
     permission_classes = (IsAdminUser,)
 
 
@@ -37,3 +43,8 @@ class ApplicantView(CreateAPIView):
 
         headers = self.get_success_headers(serializer.data)
         return Response(serializer.data, status=status.HTTP_201_CREATED, headers=headers)
+
+
+class StudentView(RetrieveUpdateAPIView):
+    queryset = Student.objects.filter(group=None)
+    serializer_class = StudentSerializer

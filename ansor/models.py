@@ -42,18 +42,45 @@ class CustomUser(AbstractUser):
     """User model."""
 
     username = None
-    email = models.EmailField(blank=True, null=True)
+    email = None
     phone_regex = RegexValidator(regex=r'^\+?1?\d{9,15}$',
                                  message="Phone number must be entered in the format: '+999999999'. Up to 15 digits allowed.")
     phone = models.CharField(validators=[phone_regex], max_length=17,
                              unique=True)  # validators should be a list
-    is_student = models.BooleanField(default=False)
+    is_student = models.BooleanField(default=True)
     is_teacher = models.BooleanField(default=False)
 
     USERNAME_FIELD = 'phone'
     REQUIRED_FIELDS = ['email']
 
     objects = UserManager()
+
+
+class Teacher(models.Model):
+    phone = models.ForeignKey(CustomUser, on_delete=models.CASCADE)
+    full_name = models.CharField(max_length=200)
+    group = models.ManyToManyField('Group')
+
+    def __str__(self):
+        return self.full_name
+
+
+class Student(models.Model):
+    phone = models.ForeignKey(CustomUser, on_delete=models.CASCADE)
+    full_name = models.CharField(max_length=200)
+    group = models.ForeignKey('Group', on_delete=models.SET_NULL, null=True)
+
+    def __str__(self):
+        return self.full_name
+
+
+class Group(models.Model):
+    name = models.CharField(max_length=50, blank=False, null=False)
+    room = models.IntegerField(blank=False, null=False)
+    course = models.ForeignKey('Course', on_delete=models.CASCADE, null=False, blank=False)
+
+    def __str__(self):
+        return self.name
 
 
 class Course(models.Model):

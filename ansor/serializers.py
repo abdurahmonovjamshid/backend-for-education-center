@@ -1,21 +1,15 @@
 from rest_framework import serializers
-from .models import Course, Applicant, CustomUser
-from rest_framework.validators import UniqueValidator
+from .models import Course, Applicant, CustomUser, Teacher, Student, Group
 from django.contrib.auth.password_validation import validate_password
 
 
 class RegisterSerializer(serializers.ModelSerializer):
-    email = serializers.EmailField(
-        required=True,
-        validators=[UniqueValidator(queryset=CustomUser.objects.all())]
-    )
-
     password = serializers.CharField(write_only=True, required=True, validators=[validate_password])
     password2 = serializers.CharField(write_only=True, required=True)
 
     class Meta:
         model = CustomUser
-        fields = ('phone', 'password', 'password2', 'email', 'first_name', 'last_name', 'is_student', 'is_teacher')
+        fields = ('phone', 'password', 'password2', 'first_name', 'last_name', 'is_student', 'is_teacher')
         extra_kwargs = {
             'first_name': {'required': True},
             'last_name': {'required': True}
@@ -30,7 +24,6 @@ class RegisterSerializer(serializers.ModelSerializer):
     def create(self, validated_data):
         user = CustomUser.objects.create(
             phone=validated_data['phone'],
-            email=validated_data['email'],
             first_name=validated_data['first_name'],
             last_name=validated_data['last_name'],
             is_student=validated_data['is_student'],
@@ -39,6 +32,19 @@ class RegisterSerializer(serializers.ModelSerializer):
 
         user.set_password(validated_data['password'])
         user.save()
+
+        if validated_data['is_student']:
+            student = Student.objects.create(
+                phone=user,
+                full_name=validated_data['first_name'] + ' ' + validated_data['last_name'],
+            )
+            student.save()
+        else:
+            teacher = Teacher.objects.create(
+                phone=user,
+                full_name=validated_data['first_name'] + ' ' + validated_data['last_name'],
+            )
+            teacher.save()
 
         return user
 
@@ -53,3 +59,15 @@ class ApplicantSerializer(serializers.ModelSerializer):
     class Meta:
         model = Applicant
         fields = '__all__'
+
+
+class GroupSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Group
+        fields = '__all__'
+
+
+class StudentSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Student
+        fields = ['id', 'full_name', 'group']

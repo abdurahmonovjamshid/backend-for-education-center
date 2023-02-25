@@ -1,4 +1,4 @@
 from django.contrib import admin
-from .models import Course, Applicant, CustomUser
+from .models import Course, Applicant, CustomUser, Group, Student, Teacher
 
-admin.site.register([Course, Applicant, CustomUser])
+admin.site.register([Course, Applicant, CustomUser, Group, Student, Teacher])
