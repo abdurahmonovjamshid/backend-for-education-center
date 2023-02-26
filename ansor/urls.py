@@ -10,6 +10,10 @@ urlpatterns = [
     path('', include(router.urls)),
 
     path('applicant/', views.ApplicantView.as_view()),
-    path('group/', views.GroupView.as_view()),
+
+    path('group/', views.GroupListView.as_view()),
+    path('group/<str:name>', views.GroupView.as_view()),
+
+    path('student/', views.StudentListView.as_view()),
     path('student/<int:pk>', views.StudentView.as_view()),
 ]

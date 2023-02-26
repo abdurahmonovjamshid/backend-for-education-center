@@ -62,9 +62,27 @@ class ApplicantSerializer(serializers.ModelSerializer):
 
 
 class GroupSerializer(serializers.ModelSerializer):
+    students = serializers.SerializerMethodField()
+
     class Meta:
         model = Group
-        fields = '__all__'
+        fields = ['name', 'teacher', 'room', 'time', 'course', 'students']
+
+    def to_representation(self, obj):
+        teacher = None
+        try:
+            teacher = obj.teacher.full_name
+        except:
+            pass
+
+        return {
+            "name": obj.name,
+            "teacher": teacher,
+            "room": obj.room,
+            "time": obj.time,
+            "course": obj.course.name,
+            "students": StudentSerializer(obj.student_set.all(), many=True).data
+        }
 
 
 class StudentSerializer(serializers.ModelSerializer):

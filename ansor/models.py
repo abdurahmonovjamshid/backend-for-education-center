@@ -59,7 +59,8 @@ class CustomUser(AbstractUser):
 class Teacher(models.Model):
     phone = models.ForeignKey(CustomUser, on_delete=models.CASCADE)
     full_name = models.CharField(max_length=200)
-    group = models.ManyToManyField('Group')
+
+    # group = models.ManyToManyField('Group')
 
     def __str__(self):
         return self.full_name
@@ -75,9 +76,11 @@ class Student(models.Model):
 
 
 class Group(models.Model):
-    name = models.CharField(max_length=50, blank=False, null=False)
+    teacher = models.ForeignKey(Teacher, on_delete=models.SET_NULL, null=True)
+    name = models.CharField(max_length=50, unique=True, blank=False, null=False)
     room = models.IntegerField(blank=False, null=False)
     course = models.ForeignKey('Course', on_delete=models.CASCADE, null=False, blank=False)
+    time = models.TimeField(null=True)
 
     def __str__(self):
         return self.name
