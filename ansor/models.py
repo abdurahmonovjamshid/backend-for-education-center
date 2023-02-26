@@ -70,6 +70,7 @@ class Student(models.Model):
     phone = models.ForeignKey(CustomUser, on_delete=models.CASCADE)
     full_name = models.CharField(max_length=200)
     group = models.ForeignKey('Group', on_delete=models.SET_NULL, null=True)
+    balance = models.FloatField(max_length=1000000, default=600000)
 
     def __str__(self):
         return self.full_name

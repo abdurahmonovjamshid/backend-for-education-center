@@ -1,6 +1,7 @@
 from rest_framework import serializers
 from .models import Course, Applicant, CustomUser, Teacher, Student, Group
 from django.contrib.auth.password_validation import validate_password
+import json
 
 
 class RegisterSerializer(serializers.ModelSerializer):
@@ -81,11 +82,13 @@ class GroupSerializer(serializers.ModelSerializer):
             "room": obj.room,
             "time": obj.time,
             "course": obj.course.name,
-            "students": StudentSerializer(obj.student_set.all(), many=True).data
+            "students": [n.full_name for n in obj.student_set.all()]
         }
 
 
 class StudentSerializer(serializers.ModelSerializer):
+    phone = serializers.CharField(read_only=True)
+
     class Meta:
         model = Student
-        fields = ['id', 'full_name', 'group']
+        fields = ['id', 'full_name', 'group', 'phone', 'balance']

@@ -6,7 +6,8 @@ from .serializers import CourseSerializer, ApplicantSerializer, RegisterSerializ
 from .models import Course, Applicant, CustomUser, Group, Student
 from rest_framework.permissions import IsAdminUser, AllowAny
 from rest_framework.viewsets import ModelViewSet
-from rest_framework.generics import CreateAPIView, ListCreateAPIView, RetrieveUpdateAPIView, ListAPIView
+from rest_framework.generics import CreateAPIView, ListCreateAPIView, RetrieveUpdateAPIView, ListAPIView, \
+    RetrieveUpdateDestroyAPIView, get_object_or_404
 import requests
 
 
@@ -19,12 +20,6 @@ class RegisterView(CreateAPIView):
 class CourseViewSet(ModelViewSet):
     queryset = Course.objects.all()
     serializer_class = CourseSerializer
-    permission_classes = (IsAdminUser,)
-
-
-class GroupListView(ListCreateAPIView):
-    queryset = Group.objects.all()
-    serializer_class = GroupSerializer
     permission_classes = (IsAdminUser,)
 
 
@@ -61,9 +56,22 @@ class StudentListView(ListAPIView):
 class StudentView(RetrieveUpdateAPIView):
     queryset = Student.objects.filter(group=None)
     serializer_class = StudentSerializer
+    permission_classes = (IsAdminUser,)
+
+    def retrieve(self, request, *args, **kwargs):
+        user = get_object_or_404(CustomUser, phone=kwargs['phone'])
+        serializer = StudentSerializer(get_object_or_404(Student, phone=user), many=False)
+        return Response(serializer.data)
 
 
-class GroupView(RetrieveUpdateAPIView):
+class GroupListView(ListCreateAPIView):
     queryset = Group.objects.all()
     serializer_class = GroupSerializer
+    permission_classes = (IsAdminUser,)
+
+
+class GroupView(RetrieveUpdateDestroyAPIView):
+    queryset = Group.objects.all()
+    serializer_class = GroupSerializer
+    permission_classes = (IsAdminUser,)
     lookup_field = 'name'

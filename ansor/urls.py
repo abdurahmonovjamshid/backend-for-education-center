@@ -15,5 +15,5 @@ urlpatterns = [
     path('group/<str:name>', views.GroupView.as_view()),
 
     path('student/', views.StudentListView.as_view()),
-    path('student/<int:pk>', views.StudentView.as_view()),
+    path('student/<str:phone>', views.StudentView.as_view()),
 ]
