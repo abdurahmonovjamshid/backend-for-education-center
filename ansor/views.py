@@ -1,9 +1,17 @@
+from django.contrib.admin import action
 from django.shortcuts import render
 from rest_framework import status
 from rest_framework.response import Response
 
-from .serializers import CourseSerializer, ApplicantSerializer, RegisterSerializer, GroupSerializer, StudentSerializer
-from .models import Course, Applicant, CustomUser, Group, Student
+from .serializers import (
+    CourseSerializer,
+    ApplicantSerializer,
+    RegisterSerializer,
+    GroupSerializer,
+    StudentSerializer,
+    TeacherSerializer
+)
+from .models import Course, Applicant, CustomUser, Group, Student, Teacher
 from rest_framework.permissions import IsAdminUser, AllowAny
 from rest_framework.viewsets import ModelViewSet
 from rest_framework.generics import CreateAPIView, ListCreateAPIView, RetrieveUpdateAPIView, ListAPIView, \
@@ -51,6 +59,7 @@ class ApplicantView(CreateAPIView):
 class StudentListView(ListAPIView):
     queryset = Student.objects.filter(group=None)
     serializer_class = StudentSerializer
+    permission_classes = (IsAdminUser,)
 
 
 class StudentView(RetrieveUpdateAPIView):
@@ -61,6 +70,23 @@ class StudentView(RetrieveUpdateAPIView):
     def retrieve(self, request, *args, **kwargs):
         user = get_object_or_404(CustomUser, phone=kwargs['phone'])
         serializer = StudentSerializer(get_object_or_404(Student, phone=user), many=False)
+        return Response(serializer.data)
+
+
+class TeacherListView(ListAPIView):
+    queryset = Teacher.objects.all()
+    serializer_class = TeacherSerializer
+    permission_classes = (IsAdminUser,)
+
+
+class TeacherView(RetrieveUpdateAPIView):
+    queryset = Teacher.objects.all()
+    serializer_class = TeacherSerializer
+    permission_classes = (IsAdminUser,)
+
+    def retrieve(self, request, *args, **kwargs):
+        user = get_object_or_404(CustomUser, phone=kwargs['phone'])
+        serializer = TeacherSerializer(get_object_or_404(Teacher, phone=user), many=False)
         return Response(serializer.data)
 
 

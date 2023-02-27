@@ -94,6 +94,15 @@ class Course(models.Model):
         return self.name
 
 
+class Attendance(models.Model):
+    group = models.ForeignKey(Group, on_delete=models.CASCADE)
+    students = models.ManyToManyField(Student)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return f'{self.group}({self.created_at})'
+
+
 class Applicant(models.Model):
     full_name = models.CharField(max_length=150, null=False, blank=False)
     course = models.ForeignKey(Course, on_delete=models.CASCADE, null=False, blank=False)
