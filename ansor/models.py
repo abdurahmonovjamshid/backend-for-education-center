@@ -82,6 +82,7 @@ class Group(models.Model):
     room = models.IntegerField(blank=False, null=False)
     course = models.ForeignKey('Course', on_delete=models.CASCADE, null=False, blank=False)
     time = models.TimeField(null=True)
+    day = models.CharField(max_length=10, null=True, blank=True)
 
     def __str__(self):
         return self.name
@@ -96,7 +97,7 @@ class Course(models.Model):
 
 class Attendance(models.Model):
     group = models.ForeignKey(Group, on_delete=models.CASCADE)
-    students = models.ManyToManyField(Student)
+    attended_students = models.ManyToManyField(Student)
     created_at = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):

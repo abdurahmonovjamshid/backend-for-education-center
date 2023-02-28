@@ -1,6 +1,5 @@
-from django.contrib.admin import action
-from django.shortcuts import render
 from rest_framework import status
+from rest_framework.decorators import api_view
 from rest_framework.response import Response
 
 from .serializers import (
@@ -9,14 +8,16 @@ from .serializers import (
     RegisterSerializer,
     GroupSerializer,
     StudentSerializer,
-    TeacherSerializer
+    TeacherSerializer,
+    AttendanceSerializer
 )
-from .models import Course, Applicant, CustomUser, Group, Student, Teacher
+from .models import Course, Applicant, CustomUser, Group, Student, Teacher, Attendance
 from rest_framework.permissions import IsAdminUser, AllowAny
 from rest_framework.viewsets import ModelViewSet
 from rest_framework.generics import CreateAPIView, ListCreateAPIView, RetrieveUpdateAPIView, ListAPIView, \
     RetrieveUpdateDestroyAPIView, get_object_or_404
 import requests
+import json
 
 
 class RegisterView(CreateAPIView):
@@ -112,9 +113,68 @@ class GroupListView(ListCreateAPIView):
     serializer_class = GroupSerializer
     permission_classes = (IsAdminUser,)
 
+    def create(self, request, *args, **kwargs):
+        try:
+            if Group.objects.filter(day=request.data['day'], time=request.data['time'], room=request.data['room']):
+                return Response('the room is not empty at this given time', status=400)
+        except:
+            pass
+        serializer = self.get_serializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        self.perform_create(serializer)
+        headers = self.get_success_headers(serializer.data)
+        return Response(serializer.data, status=status.HTTP_201_CREATED, headers=headers)
+
 
 class GroupView(RetrieveUpdateDestroyAPIView):
     queryset = Group.objects.all()
     serializer_class = GroupSerializer
     permission_classes = (IsAdminUser,)
     lookup_field = 'name'
+
+    def update(self, request, *args, **kwargs):
+        try:
+            if Group.objects.filter(day=request.data['day'], time=request.data['time'], room=request.data['room']):
+                return Response('the room is not empty at this given time', status=400)
+        except:
+            pass
+        partial = kwargs.pop('partial', False)
+        instance = self.get_object()
+        serializer = self.get_serializer(instance, data=request.data, partial=partial)
+        serializer.is_valid(raise_exception=True)
+        self.perform_update(serializer)
+
+        if getattr(instance, '_prefetched_objects_cache', None):
+            # If 'prefetch_related' has been applied to a queryset, we need to
+            # forcibly invalidate the prefetch cache on the instance.
+            instance._prefetched_objects_cache = {}
+
+        return Response(serializer.data)
+
+
+# @api_view(['GET', 'POST'])
+# def group_attendance(request, name):
+#     group = get_object_or_404(Group, name=name)
+#     attendance = Attendance.objects.filter(group=group)
+#     a = []
+#     for n in attendance:
+#         serializer = AttendanceSerializer(n, many=False)
+#         a.append(serializer.data)
+#
+#     return Response(a)
+
+class AttendanceView(ListCreateAPIView):
+    queryset = Attendance.objects.all()
+    serializer_class = AttendanceSerializer
+
+    def list(self, request, *args, **kwargs):
+        group = get_object_or_404(Group, name=kwargs['name'])
+        queryset = Attendance.objects.filter(group=group)
+
+        page = self.paginate_queryset(queryset)
+        if page is not None:
+            serializer = self.get_serializer(page, many=True)
+            return self.get_paginated_response(serializer.data)
+
+        serializer = self.get_serializer(queryset, many=True)
+        return Response(serializer.data)

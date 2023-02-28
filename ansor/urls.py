@@ -12,7 +12,8 @@ urlpatterns = [
     path('applicant/', views.ApplicantView.as_view()),
 
     path('group/', views.GroupListView.as_view()),
-    path('group/<str:name>', views.GroupView.as_view()),
+    path('group/<str:name>/', views.GroupView.as_view()),
+    path('group/<str:name>/attendance', views.AttendanceView.as_view()),
 
     path('student/', views.StudentListView.as_view()),
     path('student/<str:phone>', views.StudentView.as_view()),

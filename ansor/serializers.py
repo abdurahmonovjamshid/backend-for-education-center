@@ -64,10 +64,11 @@ class ApplicantSerializer(serializers.ModelSerializer):
 
 class GroupSerializer(serializers.ModelSerializer):
     students = serializers.SerializerMethodField()
+    day = serializers.ChoiceField(choices=['odd', 'even'])
 
     class Meta:
         model = Group
-        fields = ['name', 'teacher', 'room', 'time', 'course', 'students']
+        fields = ['name', 'teacher', 'room', 'time', 'day', 'course', 'students']
 
     def to_representation(self, obj):
         teacher = None
@@ -81,8 +82,10 @@ class GroupSerializer(serializers.ModelSerializer):
             "teacher": teacher,
             "room": obj.room,
             "time": obj.time,
+            "day": obj.day,
             "course": obj.course.name,
-            "students": [n.full_name for n in obj.student_set.all()]
+            "students": [n.full_name for n in obj.student_set.all()],
+
         }
 
 
@@ -123,4 +126,13 @@ class TeacherSerializer(serializers.ModelSerializer):
 class AttendanceSerializer(serializers.ModelSerializer):
     class Meta:
         model = Attendance
-        fields = '__all'
+        fields = '__all__'
+
+    def to_representation(self, obj):
+        return {
+            'id': obj.id,
+            'group': obj.group.name,
+            'attended_students': [n['full_name'] for n in StudentSerializer(obj.attended_students, many=True).data],
+            'created_at': obj.created_at,
+
+        }
