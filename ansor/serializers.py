@@ -93,6 +93,20 @@ class StudentSerializer(serializers.ModelSerializer):
         model = Student
         fields = ['id', 'full_name', 'group', 'phone', 'balance']
 
+    def to_representation(self, obj):
+        group = None
+        try:
+            group = obj.group.name
+        except:
+            pass
+        return {
+            'id': obj.id,
+            'full_name': obj.full_name,
+            'group': group,
+            'phone': obj.phone.phone,
+            'balance': obj.balance,
+        }
+
 
 class TeacherSerializer(serializers.ModelSerializer):
     groups = serializers.SerializerMethodField(read_only=True)
