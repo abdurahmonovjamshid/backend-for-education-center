@@ -63,10 +63,11 @@ class StudentListView(ListAPIView):
     permission_classes = (IsAdminUser,)
 
 
-class StudentView(RetrieveUpdateAPIView):
+class StudentView(RetrieveUpdateDestroyAPIView):
     queryset = Student.objects.filter(group=None)
     serializer_class = StudentSerializer
     permission_classes = (IsAdminUser,)
+    lookup_field = 'phone'
 
     # lookup_field = 'phone'
 
@@ -103,7 +104,7 @@ class TeacherView(RetrieveUpdateAPIView):
     permission_classes = (IsAdminUser,)
 
     def retrieve(self, request, *args, **kwargs):
-        user = get_object_or_404(CustomUser, phone=kwargs['phone'])
+        user = get_object_or_404(CustomUser, phone='+' + kwargs['phone'])
         serializer = TeacherSerializer(get_object_or_404(Teacher, phone=user), many=False)
         return Response(serializer.data)
 
